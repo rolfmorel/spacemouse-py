@@ -2,6 +2,13 @@ import operator
 
 from .wrapper import SpaceMouseEventMotion, SpaceMouseEventButton
 
+__all__ = ('any_motion', 'no_motion', 'motion_right', 'motion_left',
+           'motion_up', 'motion_down', 'motion_forward', 'motion_back',
+           'motion_pitch_back', 'motion_pitch_forward', 'motion_yaw_left',
+           'motion_yaw_right', 'motion_roll_right', 'motion_roll_left',
+           'any_button', 'any_button_press', 'button0', 'button1',
+           'not_button0_or_1')
+
 MIN_DEVIATION = 200
 
 
