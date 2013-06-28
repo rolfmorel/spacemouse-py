@@ -94,6 +94,9 @@ class SpaceMouse(object):
     def __str__(self):
         return "{0.manufacturer} {0.product}".format(self)
 
+    def fileno(self):
+        return self.fd
+
     @property
     def led(self):
         return bool(spacemouse_device_get_led(self))
