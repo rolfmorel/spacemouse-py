@@ -9,6 +9,6 @@ setup(
     author_email="rolfmorel@gmail.com",
     packages=['libspacemouse'],
     license='LICENSE.txt',
-    description=("A extension of libspacemouse, a free software driver for "
+    description=("An extension of libspacemouse, a free software driver for "
                  "3D/6DoFinput devices")
 )
