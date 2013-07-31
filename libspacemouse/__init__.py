@@ -1,6 +1,8 @@
 
 MIN_DEVIATION = 200
 
+AXIS_MAP_SPACENAVD = False
+
 # DRY, use __all__ definition
 from .wrapper import *
 

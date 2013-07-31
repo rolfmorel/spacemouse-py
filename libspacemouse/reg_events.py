@@ -1,6 +1,6 @@
 import operator
 
-from . import MIN_DEVIATION
+from . import MIN_DEVIATION, AXIS_MAP_SPACENAVD
 from .wrapper import SpaceMouseEventMotion, SpaceMouseEventButton
 
 __all__ = ('any_motion', 'no_motion', 'motion_right', 'motion_left',
@@ -46,7 +46,7 @@ no_motion = \
          }
      }
 
-motion_right = \
+axis_x_pos = \
     {SpaceMouseEventMotion:
         {'x':
             {'function': operator.gt,
@@ -55,7 +55,7 @@ motion_right = \
          }
      }
 
-motion_left = \
+axis_x_neg = \
     {SpaceMouseEventMotion:
         {'x':
             {'function': operator.lt,
@@ -64,7 +64,7 @@ motion_left = \
          }
      }
 
-motion_up = \
+axis_y_pos = \
     {SpaceMouseEventMotion:
         {'y':
             {'function': operator.gt,
@@ -73,7 +73,7 @@ motion_up = \
          }
      }
 
-motion_down = \
+axis_y_neg = \
     {SpaceMouseEventMotion:
         {'y':
             {'function': operator.lt,
@@ -82,7 +82,7 @@ motion_down = \
          }
      }
 
-motion_forward = \
+axis_z_pos = \
     {SpaceMouseEventMotion:
         {'z':
             {'function': operator.gt,
@@ -91,7 +91,7 @@ motion_forward = \
          }
      }
 
-motion_back = \
+axis_z_neg = \
     {SpaceMouseEventMotion:
         {'z':
             {'function': operator.lt,
@@ -100,7 +100,7 @@ motion_back = \
          }
      }
 
-motion_pitch_back = \
+axis_rx_pos = \
     {SpaceMouseEventMotion:
         {'rx':
             {'function': operator.gt,
@@ -109,7 +109,7 @@ motion_pitch_back = \
          }
      }
 
-motion_pitch_forward = \
+axis_rx_neg = \
     {SpaceMouseEventMotion:
         {'rx':
             {'function': operator.lt,
@@ -118,7 +118,7 @@ motion_pitch_forward = \
          }
      }
 
-motion_yaw_left = \
+axis_ry_pos = \
     {SpaceMouseEventMotion:
         {'ry':
             {'function': operator.gt,
@@ -127,7 +127,7 @@ motion_yaw_left = \
          }
      }
 
-motion_yaw_right = \
+axis_ry_neg = \
     {SpaceMouseEventMotion:
         {'ry':
             {'function': operator.lt,
@@ -137,7 +137,7 @@ motion_yaw_right = \
      }
 
 
-motion_roll_right = \
+axis_rz_pos = \
     {SpaceMouseEventMotion:
         {'rz':
             {'function': operator.gt,
@@ -146,7 +146,7 @@ motion_roll_right = \
          }
      }
 
-motion_roll_left = \
+axis_rz_neg = \
     {SpaceMouseEventMotion:
         {'rz':
             {'function': operator.lt,
@@ -193,3 +193,16 @@ not_button0_or_1 = \
              }
          }
      }
+
+motion_right = axis_x_pos
+motion_left = axis_x_neg
+motion_up = axis_y_pos if AXIS_MAP_SPACENAVD else axis_z_neg
+motion_down = axis_y_neg if AXIS_MAP_SPACENAVD else axis_z_pos
+motion_forward = axis_z_pos if AXIS_MAP_SPACENAVD else axis_y_neg
+motion_back = axis_z_neg if AXIS_MAP_SPACENAVD else axis_y_pos
+motion_pitch_forward = axis_rx_neg
+motion_pitch_back = axis_rx_pos
+motion_yaw_left = axis_ry_pos if AXIS_MAP_SPACENAVD else axis_rz_neg
+motion_yaw_right = axis_ry_neg if AXIS_MAP_SPACENAVD else axis_rz_pos
+motion_roll_right = axis_rz_pos if AXIS_MAP_SPACENAVD else axis_ry_neg
+motion_roll_left = axis_rz_neg if AXIS_MAP_SPACENAVD else axis_ry_pos
