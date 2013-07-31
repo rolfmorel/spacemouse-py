@@ -1,3 +1,6 @@
+
+MIN_DEVIATION = 200
+
 # DRY, use __all__ definition
 from .wrapper import *
 

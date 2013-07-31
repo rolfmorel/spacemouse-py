@@ -1,5 +1,6 @@
 import operator
 
+from . import MIN_DEVIATION
 from .wrapper import SpaceMouseEventMotion, SpaceMouseEventButton
 
 __all__ = ('any_motion', 'no_motion', 'motion_right', 'motion_left',
@@ -8,8 +9,6 @@ __all__ = ('any_motion', 'no_motion', 'motion_right', 'motion_left',
            'motion_yaw_right', 'motion_roll_right', 'motion_roll_left',
            'any_button', 'any_button_press', 'button0', 'button1',
            'not_button0_or_1')
-
-MIN_DEVIATION = 200
 
 
 def arg_between(val, low, high):
