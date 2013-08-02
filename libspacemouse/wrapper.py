@@ -7,9 +7,9 @@ __all__ = ('EVENTS', 'ACTIONS', 'READS', 'SpaceMouse', 'SpaceMouseEvent',
            'spacemouse_device_list', 'spacemouse_device_list_update',
            'spacemouse_monitor_open', 'spacemouse_monitor',
            'spacemouse_monitor_close', 'spacemouse_device_open',
-           'spacemouse_device_grab', 'spacemouse_device_ungrab',
-           'spacemouse_device_read_event', 'spacemouse_device_get_led',
-           'spacemouse_device_set_led', 'spacemouse_monitor_close')
+           'spacemouse_device_set_grab', 'spacemouse_device_read_event',
+           'spacemouse_device_get_led', 'spacemouse_device_set_led',
+           'spacemouse_monitor_close')
 
 libspacemouse = cdll.LoadLibrary("libspacemouse.so")
 
