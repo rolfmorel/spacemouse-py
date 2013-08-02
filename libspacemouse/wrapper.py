@@ -197,12 +197,9 @@ def spacemouse_device_open(mouse):
     return fd
 
 
-def spacemouse_device_grab(mouse):
-    return libspacemouse.spacemouse_device_grab(mouse._pointer)
-
-
-def spacemouse_device_ungrab(mouse):
-    return libspacemouse.spacemouse_device_ungrab(mouse._pointer)
+def spacemouse_device_set_grab(mouse, grab):
+    return libspacemouse.spacemouse_device_set_grab(mouse._pointer,
+                                                    c_int(grab))
 
 
 def spacemouse_device_read_event(mouse):
