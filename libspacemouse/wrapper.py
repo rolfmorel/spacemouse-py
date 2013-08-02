@@ -111,11 +111,8 @@ class SpaceMouse(object):
     def close(self):
         return spacemouse_device_close(self)
 
-    def grab(self):
-        return spacemouse_device_grab(self)
-
-    def ungrab(self):
-        return spacemouse_device_ungrab(self)
+    def grab(self, grab=1):
+        return spacemouse_device_set_grab(self, grab)
 
     def read_event(self):
         event_ret, event = READS.index('SPACEMOUSE_READ_IGNORE'), None
