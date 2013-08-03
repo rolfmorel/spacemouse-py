@@ -7,6 +7,7 @@ __all__ = ('EVENTS', 'ACTIONS', 'READS', 'SpaceMouse', 'SpaceMouseEvent',
            'spacemouse_device_list', 'spacemouse_device_list_update',
            'spacemouse_monitor_open', 'spacemouse_monitor',
            'spacemouse_monitor_close', 'spacemouse_device_open',
+           'spacemouse_device_get_max_axis_deviation',
            'spacemouse_device_set_grab', 'spacemouse_device_read_event',
            'spacemouse_device_get_led', 'spacemouse_device_set_led',
            'spacemouse_monitor_close')
@@ -77,6 +78,8 @@ class SpaceMouseEventButton(SpaceMouseEvent):
 
 
 class SpaceMouse(object):
+    _max_axis_deviation = None
+
     def __init__(self, ptr):
         self.id = libspacemouse.spacemouse_device_get_id(ptr)
         self.fd = libspacemouse.spacemouse_device_get_fd(ptr)
@@ -96,6 +99,13 @@ class SpaceMouse(object):
 
     def fileno(self):
         return self.fd
+
+    @property
+    def max_axis_deviation(self):
+        if self._max_axis_deviation is None:
+            self._max_axis_deviation = \
+                spacemouse_device_get_max_axis_deviation(self)
+        return self._max_axis_deviation
 
     @property
     def led(self):
@@ -192,6 +202,11 @@ def spacemouse_device_open(mouse):
             if m == mouse:
                 m.fd = mouse.fd
     return fd
+
+
+def spacemouse_device_get_max_axis_deviation(mouse):
+    return libspacemouse.spacemouse_device_get_max_axis_deviation(
+        mouse._pointer)
 
 
 def spacemouse_device_set_grab(mouse, grab):
