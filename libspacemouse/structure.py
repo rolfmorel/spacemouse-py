@@ -22,7 +22,13 @@ class spacemouse_event_button(Structure):
                 ('bnum', c_int)]
 
 
-class spacemouse_event(Union):
+class spacemouse_event_led(Structure):
+    _fields_ = [('type', c_int),
+                ('state', c_int)]
+
+
+class spacemouse_event_t(Union):
     _fields_ = [('type', c_int),
                 ('motion', spacemouse_event_motion),
-                ('button', spacemouse_event_button)]
+                ('button', spacemouse_event_button),
+                ('led', spacemouse_event_led)]

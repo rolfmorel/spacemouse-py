@@ -40,10 +40,10 @@ def run(timeout=0.2, ref=None):
             if fd == monitor.monitor_fd:
                 action, mouse = spacemouse_monitor()
 
-                if (action == ACTIONS.index('SPACEMOUSE_ACTION_ADD') and
+                if (action == ACTIONS['SPACEMOUSE_ACTION_ADD'] and
                         monitor.monitor_add_callback is not None):
                     monitor.monitor_add_callback(mouse)
-                elif (action == ACTIONS.index('SPACEMOUSE_ACTION_REMOVE') and
+                elif (action == ACTIONS['SPACEMOUSE_ACTION_REMOVE'] and
                       monitor.monitor_remove_callback is not None):
                     monitor.monitor_remove_callback(mouse)
                 continue
@@ -51,7 +51,7 @@ def run(timeout=0.2, ref=None):
             for reg_mouse in register.registered_mouses:
                 if reg_mouse.mouse.fd == fd:
                     ret, event = spacemouse_device_read_event(reg_mouse.mouse)
-                    if ret == READS.index('SPACEMOUSE_READ_SUCCESS'):
+                    if ret == READS['SPACEMOUSE_READ_SUCCESS']:
                         register.parse_event(event, reg_mouse)
                     break
 

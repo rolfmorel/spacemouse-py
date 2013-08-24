@@ -2,8 +2,10 @@
 
 # A Python implementation of the spacemouse-test program from spacemouse-utils
 
+from __future__ import print_function
+
 import libspacemouse
-from libspacemouse import reg_events, background
+from libspacemouse import SpaceMouseDeviceList ,reg_events, background
 
 
 def motion_cb(event, n, mouse, name):
@@ -40,7 +42,7 @@ def mouse_remove_cb(mouse):
 if __name__ == "__main__":
     libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
 
-    for mouse in libspacemouse.spacemouse_device_list_update():
+    for mouse in SpaceMouseDeviceList().update():
         print("device id: {0.id}\n"
               "  devnode: {0.devnode}\n"
               "  manufaturer: {0.manufacturer}\n"
