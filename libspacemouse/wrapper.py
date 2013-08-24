@@ -2,8 +2,9 @@ from ctypes import cdll, c_int, c_char_p, byref, POINTER
 
 from .structure import spacemouse, spacemouse_event_t
 
-__all__ = ('EVENTS', 'ACTIONS', 'READS', 'SpaceMouse', 'SpaceMouseEvent',
-           'SpaceMouseEventMotion', 'SpaceMouseEventButton',
+__all__ = ('EVENTS', 'ACTIONS', 'READS',
+           'SpaceMouse', 'SpaceMouseDeviceList',
+           'SpaceMouseEvent', 'SpaceMouseEventMotion', 'SpaceMouseEventButton',
            'spacemouse_device_list', 'spacemouse_monitor_open',
            'spacemouse_monitor', 'spacemouse_monitor_close',
            'spacemouse_device_open',
