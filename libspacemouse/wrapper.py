@@ -137,11 +137,6 @@ class SpaceMouse(object):
 # For use with the C wrapper API
 spacemouse_list = []
 
-#TODO: decide if this is even a good idea to add
-# For use with OO python API
-device_list = SpaceMouseDeviceList()
-
-
 def spacemouse_device_list(update=None):
     global spacemouse_list
 
