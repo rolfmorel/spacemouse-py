@@ -49,7 +49,10 @@ class SpaceMouseDeviceList(list):
 
     def update(self):
         err, mouse_list = spacemouse_device_list(update=True)
-        return type(self)(mouse_list)
+        del self[:]
+        for mouse in mouse_list:
+            self.append(mouse)
+        return self
 
 
 class SpaceMouseEvent(object):
