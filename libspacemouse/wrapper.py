@@ -1,12 +1,12 @@
 from ctypes import cdll, c_int, c_char_p, byref, POINTER
 
-from .structure import spacemouse, spacemouse_event
+from .structure import spacemouse, spacemouse_event_t
 
 __all__ = ('EVENTS', 'ACTIONS', 'READS', 'SpaceMouse', 'SpaceMouseEvent',
            'SpaceMouseEventMotion', 'SpaceMouseEventButton',
-           'spacemouse_device_list', 'spacemouse_device_list_update',
-           'spacemouse_monitor_open', 'spacemouse_monitor',
-           'spacemouse_monitor_close', 'spacemouse_device_open',
+           'spacemouse_device_list', 'spacemouse_monitor_open',
+           'spacemouse_monitor', 'spacemouse_monitor_close',
+           'spacemouse_device_open',
            'spacemouse_device_get_max_axis_deviation',
            'spacemouse_device_set_grab', 'spacemouse_device_read_event',
            'spacemouse_device_get_led', 'spacemouse_device_set_led',
@@ -14,56 +14,52 @@ __all__ = ('EVENTS', 'ACTIONS', 'READS', 'SpaceMouse', 'SpaceMouseEvent',
 
 libspacemouse = cdll.LoadLibrary("libspacemouse.so")
 
-libspacemouse.spacemouse_device_list.restype = POINTER(spacemouse)
-libspacemouse.spacemouse_device_list_update.restype = POINTER(spacemouse)
 libspacemouse.spacemouse_device_list_get_next.restype = POINTER(spacemouse)
-
-libspacemouse.spacemouse_monitor.restype = POINTER(spacemouse)
 
 libspacemouse.spacemouse_device_get_devnode.restype = c_char_p
 libspacemouse.spacemouse_device_get_manufacturer.restype = c_char_p
 libspacemouse.spacemouse_device_get_product.restype = c_char_p
 
-EVENTS = ['SPACEMOUSE_EVENT_ANY',
-          'SPACEMOUSE_EVENT_MOTION',
-          'SPACEMOUSE_EVENT_BUTTON']
+EVENTS = {'SPACEMOUSE_EVENT_MOTION': 1,
+          'SPACEMOUSE_EVENT_BUTTON': 2,
+          'SPACEMOUSE_EVENT_LED': 4
+          }
 
-ACTIONS = ['SPACEMOUSE_ACTION_IGNORE',
-           'SPACEMOUSE_ACTION_ADD',
-           'SPACEMOUSE_ACTION_REMOVE',
-           'SPACEMOUSE_ACTION_CHANGE',
-           'SPACEMOUSE_ACTION_ONLINE',
-           'SPACEMOUSE_ACTION_OFFLINE']
+ACTIONS = {'SPACEMOUSE_ACTION_IGNORE': 0,
+           'SPACEMOUSE_ACTION_ADD': 1,
+           'SPACEMOUSE_ACTION_REMOVE': 2,
+           }
 
-READS = ['SPACEMOUSE_READ_IGNORE',
-         'SPACEMOUSE_READ_SUCCESS']
+READS = {'SPACEMOUSE_READ_IGNORE': 0,
+         'SPACEMOUSE_READ_SUCCESS': 1
+         }
 
 
 #TODO: decide if this is even a good idea to add
 class SpaceMouseDeviceList(list):
     def __getslice__(self, i, j):
-        return SpaceMouseDeviceList(list.__getslice__(self, i, j))
+        return type(self)(list.__getslice__(self, i, j))
 
     def __add__(self, other):
-        return SpaceMouseDeviceList(list.__add__(self, other))
+        return type(self)(list.__add__(self, other))
 
     def __mul__(self, other):
-        return SpaceMouseDeviceList(list.__mul__(self, other))
+        return type(self)(list.__mul__(self, other))
 
     def update(self):
-        return _spacemouse_device_list(
-            libspacemouse.spacemouse_device_list_update, type(self))
+        err, mouse_list = spacemouse_device_list(update=True)
+        return type(self)(mouse_list)
 
 
 class SpaceMouseEvent(object):
-    type = EVENTS.index('SPACEMOUSE_EVENT_ANY')
+    type = -1
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
 
 class SpaceMouseEventMotion(SpaceMouseEvent):
-    type = EVENTS.index('SPACEMOUSE_EVENT_MOTION')
+    type = EVENTS['SPACEMOUSE_EVENT_MOTION']
 
     x, y, z = 0, 0, 0
     rx, ry, rz = 0, 0, 0
@@ -71,10 +67,16 @@ class SpaceMouseEventMotion(SpaceMouseEvent):
 
 
 class SpaceMouseEventButton(SpaceMouseEvent):
-    type = EVENTS.index('SPACEMOUSE_EVENT_BUTTON')
+    type = EVENTS['SPACEMOUSE_EVENT_BUTTON']
 
     press = 0
     bnum = 0
+
+
+class SpaceMouseEventLed(SpaceMouseEvent):
+    type = EVENTS['SPACEMOUSE_EVENT_LED']
+
+    state = 0
 
 
 class SpaceMouse(object):
@@ -125,8 +127,8 @@ class SpaceMouse(object):
         return spacemouse_device_set_grab(self, grab)
 
     def read_event(self):
-        event_ret, event = READS.index('SPACEMOUSE_READ_IGNORE'), None
-        while event_ret == READS.index('SPACEMOUSE_READ_IGNORE'):
+        event_ret, event = READS['SPACEMOUSE_READ_IGNORE'], None
+        while event_ret == READS['SPACEMOUSE_READ_IGNORE']:
             event_ret, event = spacemouse_device_read_event(self)
         return event
 
@@ -138,29 +140,23 @@ spacemouse_list = []
 device_list = SpaceMouseDeviceList()
 
 
-#TODO: decide if this is even a good idea to add list_type stuff
-def _spacemouse_device_list(func, list_type=None):
+def spacemouse_device_list(update=None):
     global spacemouse_list
 
-    ptr = func()
-    if list_type:
-        ret_list = list_type()
-    else:
-        ret_list = spacemouse_list = []
-    while bool(ptr):
-        mouse = SpaceMouse(ptr)
+    update = 1 if update in (True, 1) else 0
+    mouse_ptr = POINTER(spacemouse)()
 
-        ret_list.append(mouse)
-        ptr = libspacemouse.spacemouse_device_list_get_next(ptr)
-    return ret_list
+    err = libspacemouse.spacemouse_device_list(byref(mouse_ptr), c_int(update))
 
+    if err == 0:
+        spacemouse_list = []
+        while bool(mouse_ptr):
+            mouse = SpaceMouse(mouse_ptr)
 
-def spacemouse_device_list():
-    return _spacemouse_device_list(libspacemouse.spacemouse_device_list)
+            spacemouse_list.append(mouse)
+            mouse_ptr = libspacemouse.spacemouse_device_list_get_next(mouse_ptr)
 
-
-def spacemouse_device_list_update():
-    return _spacemouse_device_list(libspacemouse.spacemouse_device_list_update)
+    return err, spacemouse_list
 
 
 def spacemouse_monitor_open():
@@ -169,25 +165,24 @@ def spacemouse_monitor_open():
 
 def spacemouse_monitor():
     global spacemouse_list
-
-    action = c_int()
     mouse = None
 
-    ptr = libspacemouse.spacemouse_monitor(byref(action))
+    mouse_ptr = POINTER(spacemouse)()
 
-    if ptr and (action.value == ACTIONS.index('SPACEMOUSE_ACTION_ADD') or
-                action.value == ACTIONS.index('SPACEMOUSE_ACTION_REMOVE')):
+    action = libspacemouse.spacemouse_monitor(byref(mouse_ptr))
 
-        mouse = SpaceMouse(ptr)
+    if action in (ACTIONS['SPACEMOUSE_ACTION_ADD'],
+                  ACTIONS['SPACEMOUSE_ACTION_REMOVE']) and mouse_ptr:
+        mouse = SpaceMouse(mouse_ptr)
 
-        if action.value == ACTIONS.index('SPACEMOUSE_ACTION_ADD'):
+        if action == ACTIONS['SPACEMOUSE_ACTION_ADD']:
             spacemouse_list.append(mouse)
         else:
             for m in spacemouse_list:
                 if m == mouse:
                     spacemouse_list.remove(m)
 
-    return action.value, mouse
+    return action, mouse
 
 
 def spacemouse_monitor_close():
@@ -215,22 +210,25 @@ def spacemouse_device_set_grab(mouse, grab):
 
 
 def spacemouse_device_read_event(mouse):
-    ev = spacemouse_event()
+    ev = spacemouse_event_t()
     event = None
 
     ret = libspacemouse.spacemouse_device_read_event(mouse._pointer, byref(ev))
 
-    if ret == READS.index('SPACEMOUSE_READ_SUCCESS'):
-        if ev.type == EVENTS.index('SPACEMOUSE_EVENT_MOTION'):
+    if ret == READS['SPACEMOUSE_READ_SUCCESS']:
+        if ev.type == EVENTS['SPACEMOUSE_EVENT_MOTION']:
             event = SpaceMouseEventMotion()
             event.x, event.y, event.z = ev.motion.x, ev.motion.y, ev.motion.z
             event.rx, event.ry = ev.motion.rx, ev.motion.ry
             event.rz = ev.motion.rz
             event.period = ev.motion.period
-        elif ev.type == EVENTS.index('SPACEMOUSE_EVENT_BUTTON'):
+        elif ev.type == EVENTS['SPACEMOUSE_EVENT_BUTTON']:
             event = SpaceMouseEventButton()
             event.press = ev.button.press
             event.bnum = ev.button.bnum
+        elif ev.type == EVENTS['SPACEMOUSE_EVENT_LED']:
+            event = SpaceMouseEventLed()
+            event.state = ev.led.state
     return ret, event
 
 
