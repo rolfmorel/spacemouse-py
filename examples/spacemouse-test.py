@@ -2,6 +2,8 @@
 
 # A Python implementation of the spacemouse-test program from spacemouse-utils
 
+from __future__ import print_function
+
 import libspacemouse
 from libspacemouse import reg_events, background
 

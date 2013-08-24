@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import libspacemouse
 from libspacemouse import background
 from libspacemouse.reg_events import (motion_forward, motion_right,
