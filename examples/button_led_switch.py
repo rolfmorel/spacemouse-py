@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 import libspacemouse
-from libspacemouse import background
+from libspacemouse import SpaceMouseDeviceList ,background
 from libspacemouse.reg_events import any_button_press
 
 
@@ -27,7 +27,7 @@ def mouse_remove_cb(mouse):
 if __name__ == "__main__":
     libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
 
-    for mouse in libspacemouse.spacemouse_device_list_update():
+    for mouse in SpaceMouseDeviceList().update():
         mouse.open()
         libspacemouse.register(button_press_cb, mouse, any_button_press, 1)
 
