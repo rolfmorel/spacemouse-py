@@ -38,6 +38,10 @@ READS = {'SPACEMOUSE_READ_IGNORE': 0,
 
 #TODO: decide if this is even a good idea to add
 class SpaceMouseDeviceList(list):
+    def __init__(self, *args, **kwargs):
+        list.__init__(self, *args, **kwargs)
+        self.update()
+
     def __getslice__(self, i, j):
         return type(self)(list.__getslice__(self, i, j))
 
