@@ -24,6 +24,9 @@ READS = {'SPACEMOUSE_READ_IGNORE': 0,
          'SPACEMOUSE_READ_SUCCESS': 1
          }
 
+# For use with the C wrapper API
+spacemouse_list = []
+
 
 #TODO: decide if this is even a good idea to add
 class SpaceMouseDeviceList(list):
@@ -99,8 +102,6 @@ class SpaceMouse(object):
             event_ret, event = spacemouse_device_read_event(self)
         return event
 
-# For use with the C wrapper API
-spacemouse_list = []
 
 def spacemouse_device_list(update=None):
     global spacemouse_list
