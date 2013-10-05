@@ -57,7 +57,7 @@ def mouse_remove_cb(mouse):
 if __name__ == "__main__":
     libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
 
-    for mouse in SpaceMouseDeviceList().update():
+    for mouse in SpaceMouseDeviceList():
         mouse.open()
 
         for name, ev in name_to_event.iteritems():
