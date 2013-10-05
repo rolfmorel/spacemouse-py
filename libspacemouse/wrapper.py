@@ -2,29 +2,18 @@ from ctypes import cdll, c_int, c_char_p, byref, POINTER
 
 from .structure import spacemouse, spacemouse_event_t
 
-__all__ = ('EVENTS', 'ACTIONS', 'READS',
-           'SpaceMouse', 'SpaceMouseDeviceList',
-           'SpaceMouseEvent', 'SpaceMouseEventMotion', 'SpaceMouseEventButton',
-           'spacemouse_device_list', 'spacemouse_monitor_open',
-           'spacemouse_monitor', 'spacemouse_monitor_close',
-           'spacemouse_device_open',
-           'spacemouse_device_get_max_axis_deviation',
-           'spacemouse_device_set_grab', 'spacemouse_device_read_event',
-           'spacemouse_device_get_led', 'spacemouse_device_set_led',
-           'spacemouse_monitor_close')
+_clib = cdll.LoadLibrary("libspacemouse.so")
 
-clib = cdll.LoadLibrary("libspacemouse.so")
+_clib.spacemouse_device_list_get_next.restype = POINTER(spacemouse)
 
-clib.spacemouse_device_list_get_next.restype = POINTER(spacemouse)
-
-clib.spacemouse_device_get_devnode.restype = c_char_p
-clib.spacemouse_device_get_manufacturer.restype = c_char_p
-clib.spacemouse_device_get_product.restype = c_char_p
 
 EVENTS = {'SPACEMOUSE_EVENT_MOTION': 1,
           'SPACEMOUSE_EVENT_BUTTON': 2,
           'SPACEMOUSE_EVENT_LED': 4
           }
+_clib.spacemouse_device_get_devnode.restype = c_char_p
+_clib.spacemouse_device_get_manufacturer.restype = c_char_p
+_clib.spacemouse_device_get_product.restype = c_char_p
 
 ACTIONS = {'SPACEMOUSE_ACTION_IGNORE': 0,
            'SPACEMOUSE_ACTION_ADD': 1,
@@ -59,44 +48,16 @@ class SpaceMouseDeviceList(list):
         return self
 
 
-class SpaceMouseEvent(object):
-    type = -1
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-
-class SpaceMouseEventMotion(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_MOTION']
-
-    x, y, z = 0, 0, 0
-    rx, ry, rz = 0, 0, 0
-    period = 0
-
-
-class SpaceMouseEventButton(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_BUTTON']
-
-    press = 0
-    bnum = 0
-
-
-class SpaceMouseEventLed(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_LED']
-
-    state = 0
-
-
 class SpaceMouse(object):
     _max_axis_deviation = None
 
     def __init__(self, ptr):
-        self.id = clib.spacemouse_device_get_id(ptr)
-        self.fd = clib.spacemouse_device_get_fd(ptr)
-        self.devnode = clib.spacemouse_device_get_devnode(ptr).decode()
+        self.id = _clib.spacemouse_device_get_id(ptr)
+        self.fd = _clib.spacemouse_device_get_fd(ptr)
+        self.devnode = _clib.spacemouse_device_get_devnode(ptr).decode()
         self.manufacturer = \
-                clib.spacemouse_device_get_manufacturer(ptr).decode()
-        self.product = clib.spacemouse_device_get_product(ptr).decode()
+            _clib.spacemouse_device_get_manufacturer(ptr).decode()
+        self.product = _clib.spacemouse_device_get_product(ptr).decode()
         self._pointer = ptr
 
     def __eq__(self, other):
@@ -147,7 +108,7 @@ def spacemouse_device_list(update=None):
     update = 1 if update in (True, 1) else 0
     mouse_ptr = POINTER(spacemouse)()
 
-    err = clib.spacemouse_device_list(byref(mouse_ptr), c_int(update))
+    err = _clib.spacemouse_device_list(byref(mouse_ptr), c_int(update))
 
     if err == 0:
         spacemouse_list = []
@@ -155,13 +116,13 @@ def spacemouse_device_list(update=None):
             mouse = SpaceMouse(mouse_ptr)
 
             spacemouse_list.append(mouse)
-            mouse_ptr = clib.spacemouse_device_list_get_next(mouse_ptr)
+            mouse_ptr = _clib.spacemouse_device_list_get_next(mouse_ptr)
 
     return err, spacemouse_list
 
 
 def spacemouse_monitor_open():
-    return clib.spacemouse_monitor_open()
+    return _clib.spacemouse_monitor_open()
 
 
 def spacemouse_monitor():
@@ -171,7 +132,7 @@ def spacemouse_monitor():
 
     mouse_ptr = POINTER(spacemouse)()
 
-    action = clib.spacemouse_monitor(byref(mouse_ptr))
+    action = _clib.spacemouse_monitor(byref(mouse_ptr))
 
     if action in (ACTIONS['SPACEMOUSE_ACTION_ADD'],
                   ACTIONS['SPACEMOUSE_ACTION_REMOVE']) and mouse_ptr:
@@ -188,11 +149,11 @@ def spacemouse_monitor():
 
 
 def spacemouse_monitor_close():
-    return clib.spacemouse_monitor_close()
+    return _clib.spacemouse_monitor_close()
 
 
 def spacemouse_device_open(mouse):
-    fd = clib.spacemouse_device_open(mouse._pointer)
+    fd = _clib.spacemouse_device_open(mouse._pointer)
     if fd > -1:
         mouse.fd = fd
         for m in spacemouse_list:
@@ -202,18 +163,18 @@ def spacemouse_device_open(mouse):
 
 
 def spacemouse_device_get_max_axis_deviation(mouse):
-    return clib.spacemouse_device_get_max_axis_deviation(mouse._pointer)
+    return _clib.spacemouse_device_get_max_axis_deviation(mouse._pointer)
 
 
 def spacemouse_device_set_grab(mouse, grab):
-    return clib.spacemouse_device_set_grab(mouse._pointer, c_int(grab))
+    return _clib.spacemouse_device_set_grab(mouse._pointer, c_int(grab))
 
 
 def spacemouse_device_read_event(mouse):
     ev = spacemouse_event_t()
     event = None
 
-    ret = clib.spacemouse_device_read_event(mouse._pointer, byref(ev))
+    ret = _clib.spacemouse_device_read_event(mouse._pointer, byref(ev))
 
     if ret == READS['SPACEMOUSE_READ_SUCCESS']:
         if ev.type == EVENTS['SPACEMOUSE_EVENT_MOTION']:
@@ -233,15 +194,15 @@ def spacemouse_device_read_event(mouse):
 
 
 def spacemouse_device_get_led(mouse):
-    return clib.spacemouse_device_get_led(mouse._pointer)
+    return _clib.spacemouse_device_get_led(mouse._pointer)
 
 
 def spacemouse_device_set_led(mouse, state):
-    return clib.spacemouse_device_set_led(mouse._pointer, c_int(state))
+    return _clib.spacemouse_device_set_led(mouse._pointer, c_int(state))
 
 
 def spacemouse_device_close(mouse):
-    ret = clib.spacemouse_device_close(mouse._pointer)
+    ret = _clib.spacemouse_device_close(mouse._pointer)
 
     if ret == 0:
         mouse.fd = -1
