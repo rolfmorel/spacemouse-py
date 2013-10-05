@@ -22,25 +22,9 @@ class RegisterMouse(object):
 registered_mouses = []
 
 
-def parse_reg_event(reg_event, event):
-    ret = None
-    for event_type, desc in reg_event.items():
-        if not isinstance(event, event_type):
-            return False
-        elif not isinstance(desc, dict):
-            return True
-        for attr, cond in desc.items():
-            func, args = cond['function'], cond['arguments']
-            if func(getattr(event, attr), *args):
-                ret = True
-            else:
-                return False
-    return ret
-
-
 def parse_event(event, reg_mouse):
-    for name, (cb, reg, n_event, m_sec) in reg_mouse.cb_cond.items():
-        if parse_reg_event(reg, event):
+    for name, (cb, reg_ev, n_event, m_sec) in reg_mouse.cb_cond.items():
+        if reg_ev(event):
             if m_sec:
                 reg_mouse.cond_state[name][1] += event.period
                 if reg_mouse.cond_state[name][1] > m_sec:

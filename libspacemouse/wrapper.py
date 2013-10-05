@@ -1,16 +1,13 @@
 from ctypes import cdll, c_int, c_char_p, byref, POINTER
 
 from .structure import spacemouse, spacemouse_event_t
+from .event import (EVENTS, SpaceMouseMotionEvent, SpaceMouseButtonEvent,
+                    SpaceMouseLedEvent)
 
 _clib = cdll.LoadLibrary("libspacemouse.so")
 
 _clib.spacemouse_device_list_get_next.restype = POINTER(spacemouse)
 
-
-EVENTS = {'SPACEMOUSE_EVENT_MOTION': 1,
-          'SPACEMOUSE_EVENT_BUTTON': 2,
-          'SPACEMOUSE_EVENT_LED': 4
-          }
 _clib.spacemouse_device_get_devnode.restype = c_char_p
 _clib.spacemouse_device_get_manufacturer.restype = c_char_p
 _clib.spacemouse_device_get_product.restype = c_char_p
@@ -182,17 +179,17 @@ def spacemouse_device_read_event(mouse):
 
     if ret == READS['SPACEMOUSE_READ_SUCCESS']:
         if ev.type == EVENTS['SPACEMOUSE_EVENT_MOTION']:
-            event = SpaceMouseEventMotion()
+            event = SpaceMouseMotionEvent()
             event.x, event.y, event.z = ev.motion.x, ev.motion.y, ev.motion.z
             event.rx, event.ry = ev.motion.rx, ev.motion.ry
             event.rz = ev.motion.rz
             event.period = ev.motion.period
         elif ev.type == EVENTS['SPACEMOUSE_EVENT_BUTTON']:
-            event = SpaceMouseEventButton()
+            event = SpaceMouseButtonEvent()
             event.press = ev.button.press
             event.bnum = ev.button.bnum
         elif ev.type == EVENTS['SPACEMOUSE_EVENT_LED']:
-            event = SpaceMouseEventLed()
+            event = SpaceMouseLedEvent()
             event.state = ev.led.state
     return ret, event
 
