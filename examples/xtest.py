@@ -7,10 +7,10 @@ from Xlib.ext.xtest import fake_input
 
 import libspacemouse
 from libspacemouse import SpaceMouseDeviceList, background
-from libspacemouse.reg_events import (motion_forward, motion_right,
-                                      motion_back, motion_left,
-                                      motion_pitch_forward, motion_pitch_back,
-                                      motion_roll_left, motion_roll_right)
+from libspacemouse.event import (motion_forward, motion_right, motion_back,
+                                 motion_left, motion_pitch_forward,
+                                 motion_pitch_back, motion_roll_left,
+                                 motion_roll_right)
 
 display = Xlib.display.Display()
 
@@ -57,7 +57,7 @@ def mouse_remove_cb(mouse):
 if __name__ == "__main__":
     libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
 
-    for mouse in SpaceMouseDeviceList().update():
+    for mouse in SpaceMouseDeviceList():
         mouse.open()
 
         for name, ev in name_to_event.iteritems():

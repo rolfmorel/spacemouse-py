@@ -4,8 +4,8 @@ from __future__ import print_function
 
 import libspacemouse
 from libspacemouse import SpaceMouseDeviceList, background
-from libspacemouse.reg_events import (motion_forward, motion_right,
-                                      motion_back, motion_left, any_button)
+from libspacemouse.event import (motion_forward, motion_right,
+                                 motion_back, motion_left, any_button)
 
 
 def motion_cb(event, n, mouse, name):
@@ -35,7 +35,7 @@ def mouse_remove_cb(mouse):
 if __name__ == "__main__":
     libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
 
-    for mouse in SpaceMouseDeviceList().update():
+    for mouse in SpaceMouseDeviceList():
         mouse.open()
         libspacemouse.register(button_cb, mouse, any_button, 1)
         for ev, name in ((motion_forward, 'forward'), (motion_right, 'right'),
