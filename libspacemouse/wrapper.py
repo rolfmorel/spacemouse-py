@@ -28,20 +28,23 @@ READS = {'SPACEMOUSE_READ_IGNORE': 0,
 spacemouse_list = []
 
 
-#TODO: decide if this is even a good idea to add
 class SpaceMouseDeviceList(list):
     def __init__(self, *args, **kwargs):
+        # 'update' is keyword only arg
+        update = kwargs.pop('update', True)
         list.__init__(self, *args, **kwargs)
-        self.update()
+
+        if update:
+            self.update()
 
     def __getslice__(self, i, j):
-        return type(self)(list.__getslice__(self, i, j))
+        return type(self)(list.__getslice__(self, i, j), update=False)
 
     def __add__(self, other):
-        return type(self)(list.__add__(self, other))
+        return type(self)(list.__add__(self, other), update=False)
 
     def __mul__(self, other):
-        return type(self)(list.__mul__(self, other))
+        return type(self)(list.__mul__(self, other), update=False)
 
     def update(self):
         err, mouse_list = spacemouse_device_list(update=True)
