@@ -5,12 +5,12 @@ import Xlib.display
 from Xlib.XK import string_to_keysym
 from Xlib.ext.xtest import fake_input
 
-import libspacemouse
-from libspacemouse import SpaceMouseDeviceList, background
-from libspacemouse.event import (motion_forward, motion_right, motion_back,
-                                 motion_left, motion_pitch_forward,
-                                 motion_pitch_back, motion_roll_left,
-                                 motion_roll_right)
+import spacemouse
+from spacemouse import list_devices, monitor, loop
+from spacemouse.event import (motion_forward, motion_right, motion_back,
+                              motion_left, motion_pitch_forward,
+                              motion_pitch_back, motion_roll_left,
+                              motion_roll_right)
 
 display = Xlib.display.Display()
 
@@ -32,7 +32,7 @@ name_to_key = {'forward': string_to_keycode('Up'),
                'right': string_to_keycode('Right')}
 
 
-def motion_cb(event, n, mouse, name):
+def motion_cb(event, n, name, mouse):
     if name_to_button.get(name):
         fake_input(display, Xlib.X.ButtonPress, name_to_button[name])
         fake_input(display, Xlib.X.ButtonRelease, name_to_button[name])
@@ -46,21 +46,21 @@ def mouse_add_cb(mouse):
     mouse.open()
 
     for name, ev in name_to_event.iteritems():
-        libspacemouse.register(motion_cb, mouse, ev, m_sec=96, name=name)
+        libspacemouse.register(motion_cb, mouse, ev, millis=96, name=name)
 
 
 def mouse_remove_cb(mouse):
-    del libspacemouse.register[mouse]
     mouse.close()
 
 
 if __name__ == "__main__":
-    libspacemouse.monitor(add=mouse_add_cb, remove=mouse_remove_cb)
+    monitor(add=mouse_add_cb, remove=mouse_remove_cb)
+    monitor.start()
 
-    for mouse in SpaceMouseDeviceList():
+    for mouse in list_devices():
         mouse.open()
 
         for name, ev in name_to_event.iteritems():
-            libspacemouse.register(motion_cb, mouse, ev, m_sec=96, name=name)
+            mouse.register(motion_cb, ev, millis=96, name=name)
 
-    background.run()
+    loop.run()
