@@ -8,9 +8,11 @@ else:
 
 new_id = 1
 
+
 def match_device(device, devnode, manufacturer, product):
     return ((device.devnode, device.manufacturer, device.product) ==
             (devnode, manufacturer, product))
+
 
 class Device(BackendDevice):
     id = -1
