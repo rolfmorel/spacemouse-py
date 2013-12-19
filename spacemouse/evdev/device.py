@@ -32,6 +32,17 @@ class Device(object):
         except:
             pass
 
+    def __enter__(self):
+        if not self.fd > -1:
+            self.open()
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close(silent=True)
+
+        return True
+
     @property
     def fd(self):
         return self._input_device.fd if self._input_device is not None else -1
