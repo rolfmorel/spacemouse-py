@@ -1,6 +1,7 @@
 import os
 import select
 from collections import namedtuple
+from errno import ENODEV
 
 try:
     from threading import Thread
@@ -39,22 +40,33 @@ def run(thread=None):
 
         rfds, _, _ = select.select(rlist, [], [])
 
-        if stop_pipe.source in rfds:
-            os.close(stop_pipe.source)
-            os.close(stop_pipe.sink)
+        for fd in rfds:
+            if fd == stop_pipe.source:
+                os.close(stop_pipe.source)
+                os.close(stop_pipe.sink)
 
-            stop_pipe = Pipe(-1, -1)
+                stop_pipe = Pipe(-1, -1)
 
-            return
+                return
 
-        if monitor.fd in rfds:
-            monitor.dispatch()
+            if fd == monitor.fd:
+                monitor.dispatch()
 
-        for device in device_list:
-            if device.fd in rfds:
-                event = device.read_one()
+                continue
 
-                device.register.dispatch(event, device)
+            for device in device_list:
+                if fd == device.fd:
+                    try:
+                        event = device.read_one()
+                    except IOError as err:
+                        if err.errno == ENODEV:
+                            device.close(silent=True)
+                        else:
+                            raise
+                    else:
+                        device.register.dispatch(event, device)
+
+                    break
 
 
 def stop():

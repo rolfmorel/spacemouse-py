@@ -39,8 +39,10 @@ class Registry(object):
         new_reg = Reg(callback, condition, n, millis, name)
 
         for idx, reg in enumerate(self.regs):
-            if reg.name == name:
+            if reg.name == new_reg.name:
                 self.regs[idx] = new_reg
+
+                break
         else:
             self.regs.append(new_reg)
 

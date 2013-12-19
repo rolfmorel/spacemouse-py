@@ -4,16 +4,16 @@ from types import ModuleType
 from .list import device_list
 from .registry import Registry
 
-registry = Registry()
-
 
 class Register(ModuleType):
     def __init__(self, module):
         self.__module__ = module
         self.__name__ = module.__name__
 
+        self.registry = Registry()
+
     def __call__(self, callback, condition, n=None, millis=None, name=None):
-        registry(callback, condition, n, millis, name)
+        self.registry(callback, condition, n, millis, name)
 
         for device in device_list:
             device.register(callback, condition, n=n, millis=millis, name=name)
@@ -22,10 +22,10 @@ class Register(ModuleType):
         dev_list = [device] if device is not None else device_list
 
         for dev in dev_list:
-            for reg in registry.regs:
+            for reg in self.registry.regs:
                 if reg.name not in device.register:
                     dev.register(reg.callback, reg.condition, n=reg.n,
-                                 millis=reg.millis, name=)
+                                 millis=reg.millis, name=reg.name)
 
     def __getattr__(self, attr):
         return getattr(self.__module__, attr)

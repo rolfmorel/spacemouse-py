@@ -1,7 +1,7 @@
 import sys
 from types import ModuleType
 
-from . import backend
+from . import backend, register
 from .list import device_list
 from .device import Device
 
@@ -38,8 +38,11 @@ class Monitor(BackendMonitor, ModuleType):
 
             self.remove_cb = remove
 
-    def read_one(self):
-        action, match = super(Monitor, self).read_one()
+    def read_one(self, valid_only=True):
+        action, match = super(Monitor, self).read_one(valid_only=valid_only)
+
+        if action is None:
+            return None, None
 
         dev = Device(*match)
 
@@ -47,16 +50,24 @@ class Monitor(BackendMonitor, ModuleType):
             if dev == device:
                 if action == "remove":
                     del device_list[idx]
+                elif action == "add":
+                    raise RuntimeError("can not add a device which is already "
+                                       "in the list")
 
                 return action, device
         else:
             if action == "add":
                 device_list.append(dev)
 
+                register.update(dev)
+
         return action, dev
 
-    def read(self):
-        for action, match in iter(super(Monitor, self).read(), (None, None)):
+    def read(self, valid_only=True):
+        read_gen = iter(super(Monitor, self).read(valid_only=valid_only),
+                        (None, (None, None, None)))
+
+        for action, match in read_gen:
             dev = Device(*match)
 
             for idx, device in enumerate(device_list):
@@ -69,11 +80,12 @@ class Monitor(BackendMonitor, ModuleType):
                 if action == "add":
                     device_list.append(dev)
 
+                    register.update(dev)
                 yield action, dev
 
     def dispatch(self, action=None, device=None):
         if action is None:
-            action, device = self.read_one()
+            action, device = self.read_one(valid_only=False)
 
         if action == 'add' and self.add_cb is not None:
             self.add_cb(device)

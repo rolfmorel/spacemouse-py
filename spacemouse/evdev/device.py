@@ -1,3 +1,5 @@
+from errno import ENODEV
+
 from evdev import InputDevice, ecodes
 
 from ..event import MotionEvent, ButtonEvent, LedEvent
@@ -24,6 +26,10 @@ class Device(object):
 
         return self._input_device == other._input_device
 
+    def __del__(self):
+        if self._input_device is not None:
+            self.close()
+
     @property
     def fd(self):
         return self._input_device.fd if self._input_device is not None else -1
@@ -47,12 +53,24 @@ class Device(object):
     def open(self):
         if self._input_device is None:
             self._input_device = InputDevice(self.devnode)
+        else:
+            raise RuntimeError("can not open an already opened device")
 
         return self.fd
 
-    def close(self):
+    def close(self, silent=False):
         if self._input_device is not None:
-            return self._input_device.close()
+            try:
+                self._input_device.close()
+            except OSError as err:
+                if not (err.errno == ENODEV and silent):
+                    raise
+            finally:
+                del self._input_device
+
+                self._input_device = None
+        else:
+            raise RuntimeError("can not close an unopened device")
 
     def grab(self):
         if self._input_device is not None:

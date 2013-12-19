@@ -20,7 +20,7 @@ class Monitor(object):
     def start(self):
         self._udev_monitor.start()
 
-    def read_one(self):
+    def read_one(self, valid_only=True):
         if self._udev_monitor.started:
             for device in iter(self._udev_monitor.poll, None):
                 match = _3dconnexion_match(device)
@@ -28,10 +28,16 @@ class Monitor(object):
                 if match is not None:
                     return device.action, match
 
-    def read(self):
+                if not valid_only:
+                    return None, (None, None, None)
+
+    def read(self, valid_only=True):
         if self._udev_monitor.started:
             for device in iter(self._udev_monitor.poll, None):
                 match = _3dconnexion_match(device)
 
                 if match is not None:
                     yield device.action, match
+
+                if not valid_only:
+                    yield None, (None, None, None)
