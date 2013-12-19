@@ -31,8 +31,7 @@ def mouse_remove_cb(mouse):
 
 
 if __name__ == "__main__":
-    monitor(add=mouse_add_cb, remove=mouse_remove_cb)
-    monitor.start()
+    monitor(add=mouse_add_cb, remove=mouse_remove_cb).start()
 
     for mouse in list_devices():
         mouse.open()
