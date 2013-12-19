@@ -16,7 +16,6 @@ def mouse_add_cb(mouse):
     print(mouse, "added")
 
     mouse.open()
-    mouse.register(button_press_cb, any_button_press, 1)
 
 
 def mouse_remove_cb(mouse):
