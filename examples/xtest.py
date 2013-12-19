@@ -5,7 +5,7 @@ import Xlib.display
 from Xlib.XK import string_to_keysym
 from Xlib.ext.xtest import fake_input
 
-from spacemouse import list_devices, monitor, loop
+from spacemouse import list_devices, monitor, register, loop
 from spacemouse.event import (motion_forward, motion_right, motion_back,
                               motion_left, motion_pitch_forward,
                               motion_pitch_back, motion_roll_left,
@@ -44,22 +44,14 @@ def motion_cb(event, n, name, mouse):
 def mouse_add_cb(mouse):
     mouse.open()
 
-    for name, ev in name_to_event.iteritems():
-        mouse.register(motion_cb, ev, millis=96, name=name)
-
-
-def mouse_remove_cb(mouse):
-    mouse.close()
-
 
 if __name__ == "__main__":
-    monitor(add=mouse_add_cb, remove=mouse_remove_cb)
-    monitor.start()
+    monitor(add=mouse_add_cb).start()
 
     for mouse in list_devices():
         mouse.open()
 
-        for name, ev in name_to_event.iteritems():
-            mouse.register(motion_cb, ev, millis=96, name=name)
+    for name, ev in name_to_event.iteritems():
+        register(motion_cb, ev, millis=96, name=name)
 
     loop.run()
