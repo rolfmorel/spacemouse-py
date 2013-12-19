@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 
-from spacemouse import list_devices, monitor, loop, event
+from spacemouse import list_devices, monitor, loop, register, event
 
 
 def motion_cb(event, n, name, mouse):
@@ -28,17 +28,12 @@ def mouse_add_cb(mouse):
 
     mouse.open()
 
-    mouse.register(motion_cb, event.any_motion, 1)
-    mouse.register(button_cb, event.any_button, 1)
-
 
 def mouse_remove_cb(mouse):
     print("Device removed, device id: {0.id}\n"
           "  devnode: {0.devnode}\n"
           "  manufaturer: {0.manufacturer}\n"
           "  product: {0.product}".format(mouse))
-
-    mouse.close()
 
 
 if __name__ == "__main__":
@@ -53,7 +48,7 @@ if __name__ == "__main__":
 
         mouse.open()
 
-        mouse.register(motion_cb, event.any_motion, 1)
-        mouse.register(button_cb, event.any_button, 1)
+    register(motion_cb, event.any_motion, 1)
+    register(button_cb, event.any_button, 1)
 
     loop.run()

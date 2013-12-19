@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from spacemouse import list_devices, monitor, loop
+from spacemouse import list_devices, monitor, register, loop
 from spacemouse.event import any_button_press
 
 
@@ -22,14 +22,14 @@ def mouse_add_cb(mouse):
 def mouse_remove_cb(mouse):
     print(mouse, "removed")
 
-    mouse.close()
-
 
 if __name__ == "__main__":
     monitor(add=mouse_add_cb, remove=mouse_remove_cb)
+    monitor.start()
 
     for mouse in list_devices():
         mouse.open()
-        mouse.register(button_press_cb, any_button_press, 1)
+
+    register(button_press_cb, any_button_press, 1)
 
     loop.run()
