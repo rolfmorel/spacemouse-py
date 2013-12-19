@@ -27,7 +27,7 @@ class Device(object):
         return self._input_device == other._input_device
 
     def __del__(self):
-        if self._input_device is not None:
+        if self._input_device is not None and hasattr(self, 'close'):
             self.close()
 
     @property
