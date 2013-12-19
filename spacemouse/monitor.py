@@ -3,7 +3,7 @@ from types import ModuleType
 
 from . import backend, register
 from .list import device_list
-from .device import Device
+from .device import Device, match_device
 
 if backend.get('monitor') == "udev":
     from .udev.monitor import Monitor as BackendMonitor
@@ -38,16 +38,13 @@ class Monitor(BackendMonitor, ModuleType):
 
             self.remove_cb = remove
 
-    def read_one(self, valid_only=True):
-        action, match = super(Monitor, self).read_one(valid_only=valid_only)
-
-        if action is None:
+    @staticmethod
+    def _handle_read(action, match):
+        if action not in ("add", "remove"):
             return None, None
 
-        dev = Device(*match)
-
         for idx, device in enumerate(device_list):
-            if dev == device:
+            if match_device(device, *match):
                 if action == "remove":
                     del device_list[idx]
                 elif action == "add":
@@ -56,32 +53,29 @@ class Monitor(BackendMonitor, ModuleType):
 
                 return action, device
         else:
+            dev = Device(*match)
+
             if action == "add":
                 device_list.append(dev)
+            elif action == "remove":
+                raise RuntimeError("can not remove device from list, device "
+                                   "is not present")
 
                 register.update(dev)
 
-        return action, dev
+            return action, dev
+
+    def read_one(self, valid_only=True):
+        action, match = super(Monitor, self).read_one(valid_only=valid_only)
+
+        return self._handle_read(action, match)
 
     def read(self, valid_only=True):
         read_gen = iter(super(Monitor, self).read(valid_only=valid_only),
                         (None, (None, None, None)))
 
         for action, match in read_gen:
-            dev = Device(*match)
-
-            for idx, device in enumerate(device_list):
-                if dev == device:
-                    if action == "remove":
-                        del device_list[idx]
-
-                    yield action, device
-            else:
-                if action == "add":
-                    device_list.append(dev)
-
-                    register.update(dev)
-                yield action, dev
+            yield self._handle_read(action, match)
 
     def dispatch(self, action=None, device=None):
         if action is None:
