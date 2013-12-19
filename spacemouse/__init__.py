@@ -1,4 +1,5 @@
 MIN_DEVIATION = 256
+N_EVENTS = 16
 
 # Default backends for linux
 backend = {'list': "udev",
