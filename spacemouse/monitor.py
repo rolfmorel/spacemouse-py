@@ -38,6 +38,8 @@ class Monitor(BackendMonitor, ModuleType):
 
             self.remove_cb = remove
 
+        return self
+
     @staticmethod
     def _handle_read(action, match):
         if action not in ("add", "remove"):
