@@ -16,8 +16,6 @@ class Monitor(BackendMonitor, ModuleType):
     remove_cb = None
 
     def __init__(self, module):
-        super(Monitor, self).__init__()
-
         self.__module__ = module
         self.__name__ = module.__name__
 
