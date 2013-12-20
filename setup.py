@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup, find_packages
+
+import spacemouse
+
 
 setup(
-    name='libspacemouse',
-    version='0.1.0',
+    name='spacemouse',
+    version=spacemouse.__version__,
     author="Rolf Morel",
     author_email="rolfmorel@gmail.com",
-    packages=['libspacemouse'],
-    license='LICENSE.txt',
-    description=("An extension of libspacemouse, a free software driver for "
-                 "3D/6DoFinput devices")
+    packages=find_packages(exclude="examples"),
+    license='LGPLv3',
+    install_requires=['evdev', 'pyudev'],
+    platforms=['Linux'],
+    entry_points={'console_scripts':
+                  ('spacemouse = spacemouse.cli.main:main')
+                  },
+    description=("A free software driver for 3D/6DoF input devices")
 )
