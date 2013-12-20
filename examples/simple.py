@@ -6,8 +6,8 @@ from spacemouse import list_devices, monitor, register, loop
 from spacemouse.event import (motion_forward, motion_right, motion_back,
                               motion_left, any_button)
 
-name_event = { 'forward': motion_forward, 'right': motion_right,
-               'back': motion_back, 'left': motion_left }
+name_event = {'forward': motion_forward, 'right': motion_right,
+              'back': motion_back, 'left': motion_left}
 
 
 def motion_cb(event, n, name, mouse):
