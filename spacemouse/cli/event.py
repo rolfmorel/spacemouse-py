@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+from sys import exit
+from errno import EBUSY
+
 from .. import MIN_DEVIATION, N_EVENTS
 from .. import list_devices, event, register, monitor, loop
 from . import match_regex_options
@@ -26,6 +29,16 @@ def main(args):
 
             mouse.open()
 
+            if args.grab:
+                try:
+                    mouse.grab()
+                except (OSError, IOError) as err:
+                    if err.errno != EBUSY:
+                        raise
+                    monitor.stop()
+
+                    exit("Error: " + str(mouse) + ': ' + str(err))
+
     def mouse_remove_cb(mouse):
         print("device:", mouse.devnode, mouse.manufacturer, mouse.product,
               "disconnect")
@@ -37,6 +50,16 @@ def main(args):
     for mouse in list_devices():
         if match_regex_options(mouse, args):
             mouse.open()
+
+            if args.grab:
+                try:
+                    mouse.grab()
+                except (IOError, OSError) as err:
+                    if err.errno != EBUSY:
+                        raise
+                    monitor.stop()
+
+                    exit("Error: " + str(mouse) + ': ' + str(err))
 
     if args.milliseconds > 0:
         n_events, millis = None, args.milliseconds
