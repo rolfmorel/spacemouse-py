@@ -55,3 +55,9 @@ def main(args):
         loop.run()
     except KeyboardInterrupt:
         print()
+    finally:
+        monitor.stop()
+
+        for mouse in list_devices():
+            if mouse.fd > -1:
+                mouse.close()
