@@ -1,42 +1,33 @@
-from . import MIN_DEVIATION, AXIS_MAP_SPACENAVD
-
-EVENTS = {'SPACEMOUSE_EVENT_MOTION': 1,
-          'SPACEMOUSE_EVENT_BUTTON': 2,
-          'SPACEMOUSE_EVENT_LED': 4
-          }
+from . import MIN_DEVIATION
 
 
-class SpaceMouseEvent(object):
-    type = -1
-
+class Event(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
+    def __repr__(self):
+        attrs = ("'{}': {!s}".format(k, v) for k, v in self.__dict__.items())
 
-class SpaceMouseMotionEvent(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_MOTION']
+        return "{}({})".format(self.__class__.__name__, ", ".join(attrs))
 
+
+class MotionEvent(Event):
     x, y, z = 0, 0, 0
     rx, ry, rz = 0, 0, 0
     period = 0
 
 
-class SpaceMouseButtonEvent(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_BUTTON']
-
+class ButtonEvent(Event):
     press = 0
     bnum = 0
 
 
-class SpaceMouseLedEvent(SpaceMouseEvent):
-    type = EVENTS['SPACEMOUSE_EVENT_LED']
-
+class LedEvent(Event):
     state = 0
 
 
 class RegisterEvent(object):
-    ev_types = (SpaceMouseMotionEvent, SpaceMouseButtonEvent,
-                SpaceMouseLedEvent)
+    ev_types = (MotionEvent, ButtonEvent, LedEvent)
 
     def __init__(self, **kwargs):
         for kw, val in kwargs.items():
@@ -56,17 +47,23 @@ class RegisterEvent(object):
 
         return True
 
+    def __repr__(self):
+        keys = ", ".join(("'{}'".format(k) for k in self.__dict__))
+        msg = "{}(funcs set: {})"
+
+        return msg.format(self.__class__.__name__, keys)
+
 
 class MotionRegisterEvent(RegisterEvent):
-    ev_types = (SpaceMouseMotionEvent,)
+    ev_types = (MotionEvent,)
 
 
 class ButtonRegisterEvent(RegisterEvent):
-    ev_types = (SpaceMouseButtonEvent,)
+    ev_types = (ButtonEvent,)
 
 
 class LedRegisterEvent(RegisterEvent):
-    ev_types = (SpaceMouseLedEvent,)
+    ev_types = (LedEvent,)
 
 
 any_motion = MotionRegisterEvent()
@@ -108,13 +105,13 @@ led_off = LedRegisterEvent(state=lambda a: not bool(a))
 
 motion_right = axis_x_pos
 motion_left = axis_x_neg
-motion_up = axis_y_pos if AXIS_MAP_SPACENAVD else axis_z_neg
-motion_down = axis_y_neg if AXIS_MAP_SPACENAVD else axis_z_pos
-motion_forward = axis_z_pos if AXIS_MAP_SPACENAVD else axis_y_neg
-motion_back = axis_z_neg if AXIS_MAP_SPACENAVD else axis_y_pos
+motion_up = axis_z_neg
+motion_down = axis_z_pos
+motion_forward = axis_y_neg
+motion_back = axis_y_pos
 motion_pitch_forward = axis_rx_neg
 motion_pitch_back = axis_rx_pos
-motion_yaw_left = axis_ry_pos if AXIS_MAP_SPACENAVD else axis_rz_neg
-motion_yaw_right = axis_ry_neg if AXIS_MAP_SPACENAVD else axis_rz_pos
-motion_roll_right = axis_rz_pos if AXIS_MAP_SPACENAVD else axis_ry_neg
-motion_roll_left = axis_rz_neg if AXIS_MAP_SPACENAVD else axis_ry_pos
+motion_yaw_left = axis_rz_neg
+motion_yaw_right = axis_rz_pos
+motion_roll_right = axis_ry_neg
+motion_roll_left = axis_ry_pos
